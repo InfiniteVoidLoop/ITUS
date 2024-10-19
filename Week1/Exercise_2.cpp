@@ -1,21 +1,34 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
+#include <cstring>
 using namespace std;
 
 bool readMatrix(const char *filename, int **&matrix, int &rows, int &cols)
 {
     fstream inputFile(filename, ios::in);
 
-    if (!inputFile.is_open())
-    {
+    if (!inputFile.is_open()){
         return false;
     }
-    inputFile >> rows >> cols;
+
+    string buff;
+    cols = 0, rows = 0;
+    while(!inputFile.eof() && getline(inputFile, buff) && buff[0] != '\0'){
+        rows = rows + 1;
+        if (cols == 0){
+            istringstream iss(buff);
+            int tmp;
+            while(iss >> tmp) cols = cols + 1;
+        }
+    }
+    inputFile.clear();
+    inputFile.seekg(0, ios::beg);
 
     matrix = (int **)calloc(rows, sizeof(int *));
     for (int i = 0; i < rows; i++)
         matrix[i] = (int *)calloc(cols, sizeof(int));
-
+    
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
@@ -79,20 +92,21 @@ void transposeMatrix(int **matrix, int rows, int cols, int **&res, int &resRows,
 }
 
 void freeMatrix(int **&matrix, int rows, int cols){
+    if (matrix == NULL) return;
     for (int i = 0; i < rows; i++) free(matrix[i]);
     free(matrix);
 }
 
 int main()
 {
-    int **a, aRows, aCols;
+    int **a = nullptr, aRows, aCols;
     readMatrix("matrix_a.txt", a, aRows, aCols);
-
-    int **b, bRows, bCols;
+   
+    int **b = nullptr, bRows, bCols;
     readMatrix("matrix_b.txt", b, bRows, bCols);
-
-    int **c, cRows, cCols;
-    int **cT, cTRows, cTCols; 
+    
+    int **c = nullptr, cRows, cCols;
+    int **cT = nullptr, cTRows, cTCols; 
 
     if (multiplyMatrices(a, aRows, aCols, b, bRows, bCols, c, cRows, cCols)){
         cout << "Multiplication is successful!!! \n";

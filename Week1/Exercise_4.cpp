@@ -69,53 +69,27 @@ void removeTail(List &L){
     delete tmpNode;
 }
 
-void removeNode(List &L, int val){
-    bool flag = true;
-    while(flag){
-        bool check = false;
-        Node* delNode = NULL;
-        for (Node* ptr = L.head; ptr != NULL; ptr = ptr->next){
-            if (ptr->data == val){
-                check = true;
-                delNode = ptr;
-                break;
-            }
-        }
-        flag &= check;
-        if (flag){
-            if (delNode == L.head) removeHead(L);
-            else if (delNode->next == NULL){
-                Node* ptr = L.head;
-                for (; ptr->next != delNode; ptr = ptr->next);
-                ptr->next = NULL;
-                delete delNode;
-            }
-            else{
-                 Node* tmp = delNode->next;
-                *delNode = *tmp;
-                delete tmp;
-            }
-        }
+void removeNode(List &L, Node* delNode){
+    if (delNode == L.head) removeHead(L);
+    else if (delNode->next == NULL){
+        removeTail(L);
+    }
+    else{
+        Node* ptr;
+        for (ptr = L.head; ptr->next != delNode; ptr = ptr->next);
+        ptr->next = delNode->next;
+        delete delNode;
     }
 }
 
 void removeDuplicate(List &L){
-    bool flag = true;
-    while(flag){
-        bool check = false;
-        int duplicateValue;
-        for (Node* ptr1 = L.head; ptr1 != NULL; ptr1 = ptr1->next){
-            if (check) break;
-            for (Node* ptr2 = ptr1->next; ptr2 != NULL; ptr2 = ptr2->next){
-                if (ptr1->data == ptr2->data){
-                    check = true;
-                    duplicateValue = ptr1->data;
-                    break;
-                }
+    for (Node* ptr1 = L.head; ptr1 != NULL; ptr1 = ptr1->next){
+        for (Node* ptr2 = L.head; ptr2 != ptr1; ptr2 = ptr2->next){
+            if (ptr1->data == ptr2->data){
+                removeNode(L, ptr2);
+                break;
             }
         }
-        flag &= check;
-        if (flag) removeNode(L, duplicateValue);
     }
 }
 
@@ -128,39 +102,61 @@ void removeList(List &L){
     }
 }
 
+void displayMenu(void){
+    cout << "-------------------" << '\n';
+    cout << "       Menu        " << '\n';
+    cout << "-------------------" << '\n';
+    cout << "Press 1: Traversal nodes \n";
+    cout << "Press 2: Count nodes \n";
+    cout << "Press 3: Add head \n";
+    cout << "Press 4: Add tail \n";
+    cout << "Press 5: Remove head \n";
+    cout << "Press 6: Remove tail \n";
+    cout << "Press 7: Remove duplicate \n";
+    cout << "Press 0: Stop running \n";
+    cout << "-------------------------------- \n";
+}
+
 int main(){
+    displayMenu();
     List L;
     L.head = NULL;
     int type = 1;
+    
     while(type){
+        cout << "Enter your choice: ";
         cin >> type;
+
         if (type == 0) break;
         else if (type == 1){
-            int num;
-            cin >> num;
-            addTail(L, num);
+            cout << "The linked list: \n";
+            printList(L);
         }
         else if (type  == 2){
-            int num;
-            cin >> num;
-            addHead(L, num);
+            cout << "Number of nodes: " << countNode(L) << '\n';
         }
         else if (type == 3){
-            cout << countNode(L) << '\n';
+            cout << "Enter the data (addHead): ";
+            int val;
+            cin >> val;
+            addHead(L, val);
         }
         else if (type == 4){
-            removeHead(L);
+            cout << "Enter the data (addTail): ";
+            int val;
+            cin >> val;
+            addTail(L, val);
         }
         else if (type == 5){
-            removeTail(L);
+            removeHead(L);
         }
         else if (type == 6){
-            printList(L);
+            removeTail(L);
         }
         else if (type == 7){
             removeDuplicate(L);
         }
     }
     removeList(L);
-    printList(L);
+    return 0;
 }
