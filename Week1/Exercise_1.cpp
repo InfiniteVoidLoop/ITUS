@@ -69,21 +69,21 @@ void findLongestAscendingSubarray(int *arr, int n, int *&res, int &nres)
 
 int main()
 {
-    int *a, na;
+    int *a = nullptr, na;
     cin >> na;
     inputArray(a, na);
 
-    int *b, nb;
+    int *b = nullptr, nb;
     cin >> nb;
     inputArray(b, nb);
 
-    int *c, nc;
+    int *c = nullptr, nc;
     concatArrays(a, na, b, nb, c, nc);
     printArray(c, nc);
     cout << findMax(c, nc) << '\n';
     cout << sumArray(c, nc) << '\n';
 
-    int *res, nres;
+    int *res = nullptr, nres;
     findLongestAscendingSubarray(c, nc, res, nres);
 
     printArray(res, nres);
