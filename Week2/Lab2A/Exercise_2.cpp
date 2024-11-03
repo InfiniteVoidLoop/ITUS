@@ -5,74 +5,11 @@
 using namespace std;
 
 const int BUFF_SIZE = 2000;
-const char* dictFileName = "D:\\ITUS\\Week2\\Lab 2 - Data\\English-Vietnamese Dictionary.txt";
-
-bool checkValid(char*);     // check if the word is valid
-void addChar(char*&, char);     // add single character to string
-void addTomyDict(char** &, int &, char*);   // add a word to my dictinary 
-void getDict(const char*, char** &, int&);  // add a line from dictionary file to my dictionary array
-void freemyDict(char** &, int &sz);     // free dictionary mem
+const char* dictFileName = "..\\Lab 2 - Data\\English-Vietnamese Dictionary.txt";
 
 struct Word{
     char* word = nullptr;
     char* definition = nullptr;
-};
-
-struct WordList{
-    struct Node{ 
-        Node* child[53];
-        char* definition;    
-        Node(){
-            for (int i = 0; i <= 52; i++) child[i] = nullptr;
-            definition = nullptr;
-        }
-    };
-    int cur = 0;
-    Node* root = new Node ();
-    
-    void buildList(Word** myDict, int sz){  // build trie 
-        for (int i = 0; i < sz; i++) addWord(myDict[i]);
-    }
-
-    void addWord(Word* dictWord){   // add single word to trie 
-        if (checkValid(dictWord->word) == false) return;    
-        Node* ptr = root;
-
-        for (int i = 0; i < strlen(dictWord->word); i++){
-            int c;
-            char ch = dictWord->word[i];
-            if (ch >= 'a' && ch <= 'z') c = ch - 'a';
-            else if (ch >= 'A' && ch <='Z') c = ch - 'A'+26;
-            else if (ch == '-') ch = 52;
-            if (ptr->child[c] == nullptr) ptr->child[c] = new Node();
-            ptr = ptr->child[c];
-        }
-        ptr->definition = dictWord->definition;
-    }
-
-    char* getWordDefinition(char* word){    // get a word from trie
-        Node* ptr = root;
-        for (int i = 0; i < strlen(word); i++){
-            int c;
-            char ch = word[i];
-            if (ch >= 'a' && ch <= 'z') c = ch - 'a';
-            else if (ch >= 'A' && ch <='Z') c = ch - 'A'+26;
-            else if (ch == '-') ch = 52;
-            if (ptr->child[c] == nullptr) return nullptr;
-            ptr = ptr->child[c];
-        }
-        return ptr->definition;
-    }
-
-    void freeTrie(Node* p){
-        Node* ptr = p;
-        for (int i = 0; i <= 52; i++){
-            if (ptr->child[i] != nullptr) freeTrie(ptr->child[i]);
-        }
-        free(p);
-    }
-
-    void freeTrie(void) {freeTrie(root);}
 };
 
 void addChar(char* &ch, char a){    
@@ -91,7 +28,6 @@ void addTomyDict(Word** &myDict, int &sz, char* buff){
     int i = 0;
     while(buff[i] != ':') addChar(myDict[sz]->word, buff[i++]);
     while(buff[i] != '\0') addChar(myDict[sz]->definition, buff[i++]);
-    
     // cout << myDict[sz]->word << " " << myDict[sz]->definition << '\n';
     sz++;
 }
@@ -110,13 +46,36 @@ void getDict(const char* dictFileName, Word** &myDict, int &sz){
     dictFile.close();
 }
 
-bool checkValid(char* word){
-    for (int i = 0; i < strlen(word); i++){
-        if (word[i] == '-') continue;
-        if ((word[i] < 'a' || word[i] > 'z') && (word[i] < 'A' && word[i] > 'Z')) return false; 
+void quickSortDict(Word** &myDict, int l, int r){
+    if (l >= r) return;
+    int i = l, j = r;
+    char* pivot = myDict[(l + r) / 2]->word;
+    while (i <= j){
+        while (strcmp(myDict[i]->word, pivot) < 0) i++;
+        while (strcmp(myDict[j]->word, pivot) > 0) j--;
+        if (i <= j){
+            Word* tmp = myDict[i];
+            myDict[i] = myDict[j];
+            myDict[j] = tmp;
+            i++;
+            j--;
+        }
     }
-    return true;
+    quickSortDict(myDict, l, j);
+    quickSortDict(myDict, i, r);
 }
+
+int findDict(Word** myDict, int sz, char* word){
+    int l = 0, r = sz - 1;
+    while (l <= r){
+        int m = (l + r) / 2;
+        if (strcmp(myDict[m]->word, word) == 0) return m;
+        else if (strcmp(myDict[m]->word, word) < 0) l = m + 1;
+        else r = m - 1;
+    }
+    return -1;
+}
+
 
 void freeMyDict(Word** &myDict, int &sz){
     for (int i = 0; i < sz; i++){
@@ -129,26 +88,25 @@ void freeMyDict(Word** &myDict, int &sz){
 
 int main(int argc, char* argv[]){   
     Word** myDict = nullptr;
-
     int sz = 0;
-    WordList Trie;
-
+    
     getDict(dictFileName, myDict, sz);
-    Trie.buildList(myDict, sz);
+    quickSortDict(myDict, 0, sz - 1);
     
     fstream fileOut(argv[argc - 1], ios::out);
+    if (!fileOut.is_open()){
+        cout << "Can not open file " << argv[argc - 1] << "\n";
+        return 0;
+    }
 
     for (int i = 1; i <= argc - 2; i++){
-
-        if (checkValid(argv[i]) == false) continue;
-        char* definition = Trie.getWordDefinition(argv[i]);
-
-        if (definition == nullptr)
-            fileOut << argv[i] <<" -> Not in dictionary !!! \n"; 
-        else fileOut << argv[i]<< definition << '\n';
+        int posInDict = findDict(myDict, sz, argv[i]);
+        if (posInDict == -1)
+            fileOut << argv[i] << " --> not in the dictionary\n";
+        else 
+            fileOut << argv[i] << myDict[posInDict]->definition << '\n';
     }
     freeMyDict(myDict, sz);
-    Trie.freeTrie();
     fileOut.close();
 
     return 0;

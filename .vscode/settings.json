@@ -4,6 +4,8 @@
         "array": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp",
-        "*.tcc": "cpp"
-    }
+        "*.tcc": "cpp",
+        "ostream": "cpp"
+    },
+    "r.lsp.promptToInstall": false
 }
