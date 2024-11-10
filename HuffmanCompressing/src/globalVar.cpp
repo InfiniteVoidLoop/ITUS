@@ -1,0 +1,14 @@
+#include "../include/globalVar.h"
+#include "../include/node.h"
+#include <cstring>
+#include <vector>
+#include <map>
+using namespace std;
+
+char* fileNameIn;
+char* fileNameOut;
+int charFreq[256] = {0};
+vector<string>line;
+vector<Node*> lst;  // list node in heap while building tree
+map <char, string> compressData;
+map <string, char> decompressData;

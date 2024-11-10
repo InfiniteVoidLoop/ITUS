@@ -1,0 +1,102 @@
+#include "../include/utils.h"
+#include "../include/globalVar.h"
+#include <fstream>
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+string getExtension(char* fileName){
+    string res ="";
+    for (int i = strlen(fileName) - 1; i >= 0; i--){
+        if (fileName[i] == '.'){
+            break;
+        }
+        res = fileName[i] + res;
+    }
+    return res;
+}
+
+void readTextFile(char* fileName){
+    fstream fileIn(fileName, ios::in);
+    if (!fileIn.is_open()){
+        cout << "Can't open file " << fileName << endl;
+        return;
+    }
+    string buffer;
+    while(getline(fileIn, buffer)){
+        line.push_back(buffer);
+    }   
+   fileIn.close();
+}
+
+ void getFrequency(void){
+    for (int i = 0; i < line.size(); i++){
+        for (int j = 0; j < line[i].size(); j++){
+            charFreq[(int)line[i][j]]++;
+        }
+    }
+    for (int i = 0; i < 256; i++){
+        if (charFreq[i] > 0){
+            Node* node = new Node();
+            node->ch = (char)i;
+            node->value = charFreq[i];
+            lst.push_back(node);
+        }
+    }
+}
+
+int convertStringToBinary(string s){
+    int res = 0;
+    for (int i = 0; i < s.size(); i++){
+        bool bit = s[i] - '0';
+        res = (res << 1) | bit;
+    }
+    return res;
+}
+
+string convertBinaryToString(int num, int bitSize){
+    string res = "";
+    while (num){
+        res = (char)(num % 2 + '0') + res;
+        num = num >> 1;
+    }
+    bitSize -= res.size();
+    while(bitSize--){
+        res = '0' + res;
+    }
+    return res;
+}
+
+void compressBytesInfo(char* fileNameIn, char* fileNameOut){
+    fstream fileIn(fileNameIn, ios::in);
+    fstream fileOut(fileNameOut, ios::in | ios::binary);
+    // Count bytes from fileIn
+    int cntBytes = 0;
+    while (fileIn.get() != EOF){
+        cntBytes++;
+    }
+    fileIn.close();
+    // Count bytes from fileOut
+    int cntBytesOut = 0;
+    while (fileOut.get() != EOF){
+        cntBytesOut++;
+    }
+    fileOut.close();
+    cout << "Compress from " << cntBytes << " bytes to " << cntBytesOut << " bytes" << endl;
+}
+
+bool checkingFilesAreTheSame(char* fileName1, char* fileName2){
+    fstream file1(fileName1, ios::in);
+    fstream file2(fileName2, ios::in);
+    char c1, c2;
+    while (file1.get(c1) && file2.get(c2)){
+        if (c1 != c2){
+            file1.close();
+            file2.close();
+            return false;
+        }
+    }
+    file1.close();
+    file2.close();
+    return true;
+}
