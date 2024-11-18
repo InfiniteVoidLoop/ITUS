@@ -1,0 +1,33 @@
+Original array: 
+5 8 7 9 6 4 3 2 1 
+ 
+Selection sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Interchange sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Quick sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Bubble sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Shake sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Merge sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Heap sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Counting sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Radix sort: 
+1 2 3 4 5 6 7 8 9 
+ 
+Flash sort: 
+1 2 3 4 5 6 7 8 9 
+ 
