@@ -7,5 +7,6 @@
         "*.tcc": "cpp",
         "ostream": "cpp"
     },
-    "r.lsp.promptToInstall": false
+    "r.lsp.promptToInstall": false,
+    "C_Cpp.errorSquiggles": "enabled"
 }
