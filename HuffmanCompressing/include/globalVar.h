@@ -9,7 +9,7 @@ using namespace std;
 extern char* fileNameIn;
 extern char* fileNameOut;
 extern int charFreq[256];
-extern vector<string>line;
+extern string line;
 extern vector<Node*> lst;  // list node in heap while building tree
 extern pair <int, int> compressData[256];
 #endif

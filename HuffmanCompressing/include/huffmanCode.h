@@ -38,7 +38,8 @@ struct HuffmanCompressing{
     void getMask(Node* root, int code, int bitSize){
         if (root->l == nullptr && root->r == nullptr){
             compressData[root->ch] = make_pair(code, bitSize);
-            if (code == 0) compressData[root->ch] = make_pair(0, bitSize); 
+            cout << root->ch << " " << code << " " << bitSize << endl;
+            if (code == 0 && bitSize == 0) compressData[root->ch] = make_pair(0, 1); 
             return;    // Speacial case for single character
         }
         getMask(root->l, code << 1, bitSize + 1);
