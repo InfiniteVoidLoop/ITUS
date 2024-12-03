@@ -22,7 +22,9 @@ int main(int argc, char* argv[]){
     
     if (extFileIn == "txt" && extFileOut == "bin"){
         readTextFile(argv[1]);
+        cout << "Reading file successfully" << endl;
         getFrequency();
+        cout << "Compressing successfully" << endl;
         HuffmanCompressing huffmanCompressing;
         huffmanCompressing.buildHuffmanTree();
         huffmanCompressing.getMask();
@@ -31,14 +33,6 @@ int main(int argc, char* argv[]){
     }
     else if (extFileIn == "bin" && extFileOut == "txt"){
         decompressToTextFile();
-    }
-    else if (extFileIn == "txt" && extFileOut == "txt"){
-        if (checkingFilesAreTheSame(fileNameIn, fileNameOut)){
-            cout << "Files are the same !!!" << endl;
-        }
-        else{
-            cout << "Files are different !!!" << endl;
-        }
     }
     else{
         cout << "Invalid extension !!!" << endl;

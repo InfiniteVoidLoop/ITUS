@@ -141,7 +141,7 @@ void compressToBinaryFile(void)   // compress data
     int numBit = 0;
     int remainBit;
     bool flag = true;
-    for (int i = 0; i < line.size(); i++)
+    for (int i = 0; line[i]; i++)
     {
         char ch = line[i];
         int convertBit = compressData[int(ch)].first;
