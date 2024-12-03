@@ -24,12 +24,15 @@ void decompressToTextFile(void)  // decode data
     char buffer;
     fileIn.read(&buffer, 1);
     table_size = (unsigned char)buffer;
+
     Node* root = new Node();
     Node* tmp = root;
+
     for (int i = 0; i < table_size; i++){
         char ch = 0;
         uint16_t bin = 0;
         int bitSize = 0;
+
         fileIn.read(&ch, 1);
         fileIn.read(&buffer, 1);
         bitSize = (unsigned char)buffer;
@@ -53,9 +56,11 @@ void decompressToTextFile(void)  // decode data
                 root = root->r;
             }
         }
-        // cout << ch << " " << bin << " " << bitSize << endl;
+        // cout << ch << " " << bitSize << " " << bin << endl;
         root->ch = ch;
     }
+
+    // Read padding
     int curPos = fileIn.tellg();
     fileIn.seekg(0, ios::end);
     int padding;
@@ -66,7 +71,6 @@ void decompressToTextFile(void)  // decode data
 
     // Read compress data
     int byte, numBit = 0;
-    curPos = fileIn.tellg();
     fileIn.seekg(-1, ios::end);
     int lastByte = fileIn.tellg();
     fileIn.seekg(curPos, ios::beg);
@@ -88,7 +92,9 @@ void decompressToTextFile(void)  // decode data
             }
         }
     }
+   
     // Read the last byte of the binary file
+   
     fileIn.read(&buffer, 1);
     byte = (unsigned char)buffer;
     for (int i = 7; i >= padding; --i)
@@ -128,6 +134,7 @@ void compressToBinaryFile(void)   // compress data
         fileOut.write((char *)&ch, 1);
         fileOut.write((char *)&bitSize, 1);
         fileOut.write((char *)&bit, sizeof(bit));
+
         // cerr << ch << " " << bitSize << " " << bit << endl;
     }
 
@@ -154,12 +161,9 @@ void compressToBinaryFile(void)   // compress data
         }
     }
     remainBit = 8 - numBit;
-    int padding = 0;
-    if (remainBit != 0){
-        padding = remainBit;
-        byte = byte << padding;
-        fileOut.write((char *)&byte, 1);
-    }
+    int padding = remainBit;
+    byte = byte << padding;
+    fileOut.write((char *)&byte, 1);
     fileOut.write((char *)&padding, 1);
     cout << "Compressing successfully" << endl;
     fileOut.close();

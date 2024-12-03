@@ -24,7 +24,7 @@ void readTextFile(char* fileName){
     }
 
     char ch;
-    while(ch = fileIn.get(), fileIn.eof() == false){
+    while(fileIn.get(ch)){
          line = line + ch;
     }
     fileIn.close();
