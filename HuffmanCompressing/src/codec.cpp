@@ -145,7 +145,6 @@ void compressToBinaryFile(void)   // compress data
         byte = byte << padding;
         fileOut.write((char *)&byte, 1);
     }
-    // cout << "Padding: " << padding << endl;
     fileOut.write((char *)&padding, 1);
     cout << "Compressing successfully" << endl;
     fileOut.close();
