@@ -14,6 +14,7 @@
 #define se second
 #define pb push_back
 using namespace std;
+
 struct HuffmanCompressing{
     Node* root = nullptr;
     
@@ -33,33 +34,18 @@ struct HuffmanCompressing{
         }
         root = heapSort.getTop(n);
     }
-
-    void printHuffmanTree(Node* root, string code){
-        if (root->l == nullptr && root->r == nullptr){
-            cout << root->ch << " " << code << endl;
-            return;
-        }
-        printHuffmanTree(root->l, code + "0");
-        printHuffmanTree(root->r, code + "1");
-    }
     
-    void getMask(Node* root, string code = ""){
+    void getMask(Node* root, int code, int bitSize){
         if (root->l == nullptr && root->r == nullptr){
-            compressData[root->ch] = code; 
-            if (code == "") compressData[root->ch] = "0";       // Speacial case for single character
-            return;
+            compressData[root->ch] = make_pair(code, bitSize);
+            if (code == 0) compressData[root->ch] = make_pair(0, bitSize); 
+            return;    // Speacial case for single character
         }
-        getMask(root->l, code + "0");
-        getMask(root->r, code + "1");
+        getMask(root->l, code << 1, bitSize + 1);
+        getMask(root->r, (code << 1) | 1, bitSize + 1);
     }
-    
     void getMask(void){
-        getMask(root);
-    }
-    void printMask(void){
-        for (auto it = compressData.begin(); it != compressData.end(); it++){
-            cout << it->first << " " << it->second << endl;
-        }
+        getMask(root, 0, 0);
     }
 };
 #endif

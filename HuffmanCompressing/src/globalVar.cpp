@@ -10,5 +10,5 @@ char* fileNameOut;
 int charFreq[256] = {0};
 vector<string>line;
 vector<Node*> lst;  // list node in heap while building tree
-map <char, string> compressData;
-map <string, char> decompressData;
+pair <int, int> compressData[256];
+

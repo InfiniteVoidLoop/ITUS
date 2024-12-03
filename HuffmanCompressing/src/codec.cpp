@@ -3,6 +3,7 @@
 #include "../include/codec.h"
 #include "../include/utils.h"
 #include "../include/globalVar.h"
+#include "../include/huffmanCode.h"
 
 void decompressToTextFile(void)  // decode data
 { 
@@ -23,19 +24,21 @@ void decompressToTextFile(void)  // decode data
     char buffer;
     fileIn.read(&buffer, 1);
     table_size = (int)buffer;
-    for (int i = 0; i < table_size; i++)
-    {
+    for (int i = 0; i < table_size; i++){
         char ch = 0;
-        int bitSize = 0;
-        int compressBit = 0;
+        int freq = 0;
         fileIn.read(&ch, 1);
         fileIn.read(&buffer, 1);
-        bitSize = (int)buffer;
-        fileIn.read(&buffer, 1);
-        compressBit = (int)buffer;
-        decompressData[convertBinaryToString(compressBit, bitSize)] = ch;
+        charFreq[(int)ch] = (int)buffer;
+        Node* node = new Node();
+        node->ch = ch;
+        node->value = charFreq[(int)ch];
+        lst.push_back(node);
     }
-
+    // Build Huffman Tree
+    HuffmanCompressing huffmanCompressing;
+    huffmanCompressing.buildHuffmanTree();
+    
     int curPos = fileIn.tellg();
     fileIn.seekg(0, ios::end);
     int padding;
@@ -52,6 +55,7 @@ void decompressToTextFile(void)  // decode data
     fileIn.seekg(-1, ios::end);
     int lastByte = fileIn.tellg();
     fileIn.seekg(curPos, ios::beg);
+    Node* root = huffmanCompressing.root;
 
     while (fileIn.tellg() != lastByte - 1)
     {
@@ -60,11 +64,12 @@ void decompressToTextFile(void)  // decode data
         for (int i = 7; i >= 0; --i)
         {
             bool bit = (byte >> i) & 1;
-            code = code + (char)(bit + '0');
-            if (decompressData.find(code) != decompressData.end())
+            if (bit == 0) root = root->l;
+            else root = root->r;
+            if (root->l == nullptr && root->r == nullptr)
             {
-                fileOut << decompressData[code];
-                code = "";
+                fileOut << root->ch;
+                root = huffmanCompressing.root;
             }
         }
     }
@@ -74,13 +79,15 @@ void decompressToTextFile(void)  // decode data
     for (int i = 7; i >= padding; --i)
     {
         bool bit = (byte >> i) & 1;
-        code = code + (char)(bit + '0');
-        if (decompressData.find(code) != decompressData.end())
-        {
-            fileOut << decompressData[code];
-            code = "";
-        }
+        if (bit == 0) root = root->l;
+        else root = root->r;
+        if (root->l == nullptr && root->r == nullptr){
+            fileOut << root->ch;
+            root = huffmanCompressing.root;
+        }   
     }
+    if (root == huffmanCompressing.root) cout << "Decompressing successfully" << endl;
+    else cout << "Decompressing failed" << endl;
     cout << "Decompressing successfully" << endl;
     fileIn.close();
     fileOut.close();
@@ -95,18 +102,19 @@ void compressToBinaryFile(void)   // compress data
         return;
     }
     // Write table for decoding data
-    int table_size = compressData.size();
+    int table_size = 0;
+    for (int i = 0; i < 256; i++){
+        if (compressData[i].second != 0) table_size++;
+    }
     fileOut.write((char *)&table_size, 1);
 
-    for (auto it = compressData.begin(); it != compressData.end(); it++)
-    {
-        int bitSize = it->second.size();
-        int compressBit = convertStringToBinary(it->second);
-        fileOut.write((char *)&it->first, 1);
-        fileOut.write((char *)&bitSize, 1);
-        fileOut.write((char *)&compressBit, 1);
+    for (int i = 0; i < 256; i++){
+        if (charFreq[i] == 0) continue;
+        char ch = char(i);
+        int freq = charFreq[i];
+        fileOut.write((char *)&ch, 1);
+        fileOut.write((char *)&freq, 1);
     }
-
     // Compress Data
     int byte = 0;
     int numBit = 0;
@@ -115,27 +123,24 @@ void compressToBinaryFile(void)   // compress data
         for (int j = 0; j < line[i].size(); j++)
         {
             char ch = line[i][j];
-            string code = compressData[ch];
-            int convertBit = convertStringToBinary(code);
-            if (numBit + code.size() <= 8)
-            {
-                numBit += code.size();
-                byte = (byte << code.size()) | convertBit;
+            int convertBit = compressData[int(ch)].first;
+            int bitSize = compressData[int(ch)].second;
+            if (numBit + bitSize <= 8){
+                numBit += bitSize;
+                byte = (byte << bitSize) | convertBit;
             }
-            else
-            {
+            else{
                 int remainBit = 8 - numBit;
-                byte = (byte << remainBit) | (convertBit >> (code.size() - remainBit));
+                byte = (byte << remainBit) | (convertBit >> (bitSize - remainBit));
                 fileOut.write((char *)&byte, 1);
                 byte = 0;
-                numBit = code.size() - remainBit;
+                numBit = bitSize - remainBit;
                 byte = (byte << numBit) | (convertBit & ((1 << (numBit + 1)) - 1));
             }
         }
     }
     int padding = 0;
-    if (byte)
-    {
+    if (byte){
         padding = 8 - numBit;
         byte = byte << padding;
         fileOut.write((char *)&byte, 1);
