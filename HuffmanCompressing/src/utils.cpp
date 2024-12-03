@@ -45,28 +45,6 @@ void readTextFile(char* fileName){
     }
 }
 
-int convertStringToBinary(string s){
-    int res = 0;
-    for (int i = 0; i < s.size(); i++){
-        bool bit = s[i] - '0';
-        res = (res << 1) | bit;
-    }
-    return res;
-}
-
-string convertBinaryToString(int num, int bitSize){
-    string res = "";
-    while (num){
-        res = (char)(num % 2 + '0') + res;
-        num = num >> 1;
-    }
-    bitSize -= res.size();
-    while(bitSize--){
-        res = '0' + res;
-    }
-    return res;
-}
-
 void compressBytesInfo(char* fileNameIn, char* fileNameOut){
     fstream fileIn(fileNameIn, ios::in);
     fstream fileOut(fileNameOut, ios::in | ios::binary);
