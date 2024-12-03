@@ -67,14 +67,34 @@ bool checkingFilesAreTheSame(char* fileName1, char* fileName2){
     fstream file1(fileName1, ios::in);
     fstream file2(fileName2, ios::in);
     char c1, c2;
+    bool flag = true;
+
     while (file1.get(c1) && file2.get(c2)){
         if (c1 != c2){
-            file1.close();
-            file2.close();
-            return false;
+            flag = false;
+        }
+        if (!flag){
+            cout << c1;
         }
     }
+    cout << '\n' << '\n' << '\n';
+    flag = true;
     file1.close();
     file2.close();
-    return true;
+    file1.open(fileName1, ios::in);
+    file2.open(fileName2, ios::in);
+
+     while (file1.get(c1) && file2.get(c2)){
+        if (c1 != c2){
+            flag = false;
+        }
+        if (!flag){
+            cout << c2;
+        }
+    }
+    cout << '\n';
+    file1.close();
+    file2.close();
+    if (flag) return true;
+    return false;
 }

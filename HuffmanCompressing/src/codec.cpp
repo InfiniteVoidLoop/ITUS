@@ -30,7 +30,7 @@ void decompressToTextFile(void)  // decode data
 
     for (int i = 0; i < table_size; i++){
         char ch = 0;
-        uint16_t bin = 0;
+        uint32_t bin = 0;
         int bitSize = 0;
 
         fileIn.read(&ch, 1);
@@ -94,7 +94,6 @@ void decompressToTextFile(void)  // decode data
     }
    
     // Read the last byte of the binary file
-   
     fileIn.read(&buffer, 1);
     byte = (unsigned char)buffer;
     for (int i = 7; i >= padding; --i)
@@ -129,12 +128,11 @@ void compressToBinaryFile(void)   // compress data
     for (int i = 0; i < 256; i++){
         if (charFreq[i] == 0) continue;
         char ch = i;
-        uint16_t bit = compressData[i].first;
+        uint32_t bit = compressData[i].first;
         int bitSize = compressData[i].second;
         fileOut.write((char *)&ch, 1);
         fileOut.write((char *)&bitSize, 1);
-        fileOut.write((char *)&bit, sizeof(bit));
-
+        fileOut.write((char *)&bit, 4);
         // cerr << ch << " " << bitSize << " " << bit << endl;
     }
 
@@ -142,29 +140,34 @@ void compressToBinaryFile(void)   // compress data
     int byte = 0;
     int numBit = 0;
     int remainBit;
+    bool flag = true;
     for (int i = 0; i < line.size(); i++)
     {
         char ch = line[i];
         int convertBit = compressData[int(ch)].first;
         int bitSize = compressData[int(ch)].second;
-        remainBit = 8 - numBit;
-        if (remainBit >= bitSize){
-            byte = (byte << bitSize) | convertBit;
-            numBit += bitSize;
-        }
-        else{
-            byte = (byte << remainBit) | (convertBit >> (bitSize - remainBit));
-            fileOut.write((char *)&byte, 1);
-            byte = 0;
-            numBit = bitSize - remainBit;
-            byte = (convertBit & ((1 << (numBit + 1)) - 1));
+        while (bitSize > 0) {
+            remainBit = 8 - numBit;
+            if (remainBit >= bitSize){
+                byte = (byte << bitSize) | convertBit;
+                numBit += bitSize;
+                bitSize = 0;
+            }
+            else{
+                bitSize -= remainBit;
+                byte = (byte << remainBit) | (convertBit >> bitSize);
+                fileOut.write((char *)&byte, 1);
+                numBit = byte = 0;
+            }
         }
     }
-    remainBit = 8 - numBit;
+   
+    remainBit = 8 - numBit; 
     int padding = remainBit;
     byte = byte << padding;
     fileOut.write((char *)&byte, 1);
     fileOut.write((char *)&padding, 1);
+
     cout << "Compressing successfully" << endl;
     fileOut.close();
 }
