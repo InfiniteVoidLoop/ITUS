@@ -8,7 +8,7 @@ using namespace std;
 char* fileNameIn;
 char* fileNameOut;
 int charFreq[256] = {0};
-vector<string>line;
+string line;
 vector<Node*> lst;  // list node in heap while building tree
 pair <int, int> compressData[256];
 

@@ -22,19 +22,18 @@ void readTextFile(char* fileName){
         cout << "Can't open file " << fileName << endl;
         return;
     }
-    string buffer;
-    while(getline(fileIn, buffer)){
-        line.push_back(buffer);
-    }   
-   fileIn.close();
+    char ch;
+    while(ch = fileIn.get(), fileIn.eof() == false){
+         line = line + ch;
+    }
+    fileIn.close();
 }
 
  void getFrequency(void){
     for (int i = 0; i < line.size(); i++){
-        for (int j = 0; j < line[i].size(); j++){
-            charFreq[(int)line[i][j]]++;
-        }
+        charFreq[(int)line[i]]++;
     }
+
     for (int i = 0; i < 256; i++){
         if (charFreq[i] > 0){
             Node* node = new Node();
