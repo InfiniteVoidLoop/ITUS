@@ -22,6 +22,7 @@ void readTextFile(char* fileName){
         cout << "Can't open file " << fileName << endl;
         return;
     }
+
     char ch;
     while(ch = fileIn.get(), fileIn.eof() == false){
          line = line + ch;

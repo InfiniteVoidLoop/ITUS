@@ -28,7 +28,7 @@ void decompressToTextFile(void)  // decode data
     Node* tmp = root;
     for (int i = 0; i < table_size; i++){
         char ch = 0;
-        int32_t bin = 0;
+        uint16_t bin = 0;
         int bitSize = 0;
         fileIn.read(&ch, 1);
         fileIn.read(&buffer, 1);
@@ -53,7 +53,7 @@ void decompressToTextFile(void)  // decode data
                 root = root->r;
             }
         }
-        cout << ch << " " << bin << " " << bitSize << endl;
+        // cout << ch << " " << bin << " " << bitSize << endl;
         root->ch = ch;
     }
     int curPos = fileIn.tellg();
@@ -123,12 +123,12 @@ void compressToBinaryFile(void)   // compress data
     for (int i = 0; i < 256; i++){
         if (charFreq[i] == 0) continue;
         char ch = i;
-        int32_t bit = compressData[i].first;
+        uint16_t bit = compressData[i].first;
         int bitSize = compressData[i].second;
         fileOut.write((char *)&ch, 1);
         fileOut.write((char *)&bitSize, 1);
-        fileOut.write((char *)&bit, 4);
-        cout << ch << " " << bitSize << " " << bit << endl;
+        fileOut.write((char *)&bit, sizeof(bit));
+        // cerr << ch << " " << bitSize << " " << bit << endl;
     }
 
     // Compress Data
