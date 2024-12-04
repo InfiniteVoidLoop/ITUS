@@ -23,9 +23,6 @@ int main(int argc, char* argv[]){
     if (extFileIn == "txt" && extFileOut == "bin"){
         readTextFile(argv[1]);
         getFrequency();
-        HuffmanCompressing huffmanCompressing;
-        huffmanCompressing.buildHuffmanTree();
-        huffmanCompressing.getMask();
         compressToBinaryFile();
         compressBytesInfo(fileNameIn, fileNameOut);
     }
