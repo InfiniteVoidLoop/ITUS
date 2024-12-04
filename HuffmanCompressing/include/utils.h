@@ -8,7 +8,6 @@ string getExtension(char*);
 void readTextFile(char*);
 void getFrequency(void);
 void compressBytesInfo(char*, char*);
-bool checkingFilesAreTheSame(char*, char*);
 
 #endif
 

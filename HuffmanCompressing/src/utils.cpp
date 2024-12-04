@@ -22,10 +22,15 @@ void readTextFile(char* fileName){
         cout << "Can't open file " << fileName << endl;
         return;
     }
-
-    char ch;
-    while(fileIn.get(ch)){
-         line = line + ch;
+    string temp;
+    bool check = false;
+    while (!fileIn.eof()){
+        getline(fileIn, temp);
+        line += temp + "\n";
+        check = true;
+    }
+    if (check) {
+        line.pop_back();
     }
     fileIn.close();
 }
