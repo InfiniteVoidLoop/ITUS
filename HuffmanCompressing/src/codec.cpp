@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <bitset>
-#include <time.h>
 #include "../include/codec.h"
 #include "../include/utils.h"
 #include "../include/globalVar.h"
@@ -100,9 +99,6 @@ void decompressToTextFile(void)  // decode data
 
 void compressToBinaryFile(void)   // compress data
 { 
-    // start time.h
-    double startTime = clock();    
-
     fstream fileOut(fileNameOut, ios::out | ios::binary);
     if (!fileOut.is_open())
     {
@@ -145,6 +141,7 @@ void compressToBinaryFile(void)   // compress data
     for (int i = 0; line[i]; i++)
     {
         char ch = line[i];
+        bitset <256> convertBit = codeBook[ch];
         // cout << ch << " " << codeBook[ch] << endl;
         int bitLength = compressData[int(ch)];
         maxLength = max(maxLength, bitLength);
@@ -152,7 +149,7 @@ void compressToBinaryFile(void)   // compress data
             remainBit = 8 - numBit;
             if (remainBit >= bitLength){
                 byte = (byte << bitLength);
-                ORBIT(byte, codeBook[ch]);
+                ORBIT(byte, convertBit);
                 
                 numBit += bitLength;
                 bitLength = 0;
@@ -161,13 +158,13 @@ void compressToBinaryFile(void)   // compress data
                 bitLength -= remainBit;
                 byte <<= remainBit;
                 for (int i = 0; i < bitLength; i++){
-                    carryBit[i] = codeBook[ch][i];
+                    carryBit[i] = convertBit[i];
                 }
-                codeBook[ch] >>= bitLength;
-                ORBIT(byte, codeBook[ch]);
-                codeBook[ch] <<= bitLength;
+                convertBit >>= bitLength;
+                ORBIT(byte, convertBit);
+                convertBit <<= bitLength;
                 for (int i = 0; i < bitLength; i++){
-                    codeBook[ch][i] = carryBit[i];
+                    convertBit[i] = carryBit[i];
                 }
                 fileOut.write((char *)&byte, 1);
                 numBit = 0;
@@ -182,7 +179,6 @@ void compressToBinaryFile(void)   // compress data
     byte = byte << padding;
     fileOut.write((char *)&byte, 1);
     fileOut.write((char *)&padding, 1);
-    cout << "Time running: " << (clock() - startTime) / CLOCKS_PER_SEC << "s" << endl;
     cout << "Max length: " << maxLength << endl;
     cout << "Compressing successfully" << endl;
     fileOut.close();
