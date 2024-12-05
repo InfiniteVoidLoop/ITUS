@@ -34,6 +34,7 @@ void readTextFile(char* fileName){
     if (check) {
         line.pop_back();
     }
+    cout << "Len: " << line.size() << endl;
     fileIn.close();
 }
 

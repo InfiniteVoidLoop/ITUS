@@ -11,7 +11,7 @@ char* fileNameOut;
 int charFreq[256] = {0};
 string line;
 vector<Node*> lst;  // list node in heap while building tree
-pair <int, int> compressData[256];  // code values and bit length of huffman tree
+int compressData[256];  // code values and bit length of huffman tree
 
 bitset <256> codeBook[256];  // code of canonical form
 vector <pair <int,char >> lstCanonical;     // list for building canonical huffman code

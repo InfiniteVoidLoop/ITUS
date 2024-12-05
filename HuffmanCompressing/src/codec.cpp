@@ -118,7 +118,8 @@ void compressToBinaryFile(void)   // compress data
     for (int i = 0; i < 256; i++){
         if (charFreq[i] == 0) continue;
         table_size++;
-        lstCanonical.push_back(make_pair(compressData[i].second, char(i)));
+        lstCanonical.push_back(make_pair(compressData[i], char(i)));
+        
         // cerr << char(i) << " " << compressData[i].first << endl;
     }
 
@@ -126,7 +127,7 @@ void compressToBinaryFile(void)   // compress data
     for (int i = 0; i < 256; i++){
         if (charFreq[i] == 0) continue;
         char ch = i;
-        char bitLength = compressData[i].second;
+        char bitLength = compressData[i];
         fileOut.write((char *)&ch, 1);
         fileOut.write((char *)&bitLength, 1);
     }
@@ -145,7 +146,7 @@ void compressToBinaryFile(void)   // compress data
     {
         char ch = line[i];
         // cout << ch << " " << codeBook[ch] << endl;
-        int bitLength = compressData[int(ch)].second;
+        int bitLength = compressData[int(ch)];
         maxLength = max(maxLength, bitLength);
         while (bitLength > 0) {
             remainBit = 8 - numBit;

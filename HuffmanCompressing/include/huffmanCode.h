@@ -36,18 +36,18 @@ struct HuffmanCompressing{
         root = heapSort.getTop(n);
     }
     
-    void getMask(Node* root, int code, int bitSize){
+    void getMask(Node* root, int bitSize){
         if (root->l == nullptr && root->r == nullptr){
-            compressData[root->ch] = make_pair(code, bitSize);
-            if (code == 0 && bitSize == 0) compressData[root->ch] = make_pair(0, 1); 
+            compressData[root->ch] = bitSize;
+            if (bitSize == 0) compressData[root->ch] = 1;
             return;    // Speacial case for single character
         }
-        getMask(root->l, code << 1, bitSize + 1);
-        getMask(root->r, (code << 1) | 1, bitSize + 1);
+        getMask(root->l, bitSize + 1);
+        getMask(root->r, bitSize + 1);
     }
 
     void getMask(void){
-        getMask(root, 0, 0);
+        getMask(root, 0);
     }
 
     void deleteTree(Node* root){
