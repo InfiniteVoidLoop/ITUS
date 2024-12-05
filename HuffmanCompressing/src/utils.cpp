@@ -3,8 +3,6 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include <bitset>
-
 using namespace std;
 
 string getExtension(char* fileName){
@@ -34,7 +32,6 @@ void readTextFile(char* fileName){
     if (check) {
         line.pop_back();
     }
-    cout << "Len: " << line.size() << endl;
     fileIn.close();
 }
 
@@ -69,36 +66,4 @@ void compressBytesInfo(char* fileNameIn, char* fileNameOut){
     }
     fileOut.close();
     cout << "Compress from " << cntBytes << " bytes to " << cntBytesOut << " bytes" << endl;
-}
-
-void addOne(bitset <256> &a){   
-    bool carry = 1;
-    for (int i = 0; i < 256; i++){
-        if (a[i] == 0){
-            if (carry == 1){
-                a[i] = 1;
-                carry = 0;
-            }
-            else if (carry == 0){
-                a[i] = 0;
-            }
-        }
-        else if (a[i] == 1){
-            if (carry == 1){
-                a[i] = 0;
-            }
-            else if (carry == 0){
-                a[i] = 1;
-                carry = 0;
-            }
-        }
-    }
-}
-
-void ORBIT(bitset <8>&a, bitset <256>&b){
-    for (int i = 0; i < 8; i++){
-        if (a[i] == 1 || b[i] == 1){
-            a[i] = 1;
-        }
-    }
 }

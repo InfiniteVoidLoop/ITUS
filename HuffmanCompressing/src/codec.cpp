@@ -1,8 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <algorithm>
-#include <bitset>
 #include "../include/codec.h"
 #include "../include/utils.h"
 #include "../include/globalVar.h"
@@ -22,28 +19,46 @@ void decompressToTextFile(void)  // decode data
         cout << "Can't open file " << fileNameOut << endl;
         return;
     }
-    
     // Read table for decoding data
     int table_size;
     char buffer;
     fileIn.read(&buffer, 1);
     table_size = (unsigned char)buffer;
 
+    Node* root = new Node();
+    Node* tmp = root;
 
     for (int i = 0; i < table_size; i++){
         char ch = 0;
-        int bitLength = 0;
+        uint32_t bin = 0;
+        int bitSize = 0;
+
         fileIn.read(&ch, 1);
         fileIn.read(&buffer, 1);
-        bitLength = (unsigned char)buffer;
-        lstCanonical.push_back(make_pair(bitLength, ch));
+        bitSize = (unsigned char)buffer;
+        fileIn.read(reinterpret_cast<char*>(&bin), sizeof(bin));
+        
+        root = tmp;
+        for (int j = bitSize - 1; j >= 0; j--){
+            bool bit = (bin >> j) & 1;
+            if (bit == 0){
+                if (root->l == nullptr){
+                    Node* node = new Node();
+                    root->l = node;
+                }
+                root = root->l;
+            }
+            else if(bit == 1){
+                if (root->r == nullptr){
+                    Node* node = new Node();
+                    root->r = node;
+                }
+                root = root->r;
+            }
+        }
+        // cout << ch << " " << bitSize << " " << bin << endl;
+        root->ch = ch;
     }
-
-    // Build tree in canoncal form
-    sort(lstCanonical.begin(), lstCanonical.end());
-    CanonicalHuffmanTree canonicalHuffmanTree;
-    canonicalHuffmanTree.buildCode();
-    canonicalHuffmanTree.buildCanonicalHuffmanTree();
 
     // Read padding
     int curPos = fileIn.tellg();
@@ -60,7 +75,7 @@ void decompressToTextFile(void)  // decode data
     int lastByte = fileIn.tellg();
     fileIn.seekg(curPos, ios::beg);
 
-    Node* root = canonicalHuffmanTree.root;
+    root = tmp;
     while (fileIn.tellg() != lastByte - 1)
     {
         fileIn.read(&buffer, 1);
@@ -73,11 +88,11 @@ void decompressToTextFile(void)  // decode data
             if (root->l == nullptr && root->r == nullptr)
             {
                 fileOut << root->ch;
-                root = canonicalHuffmanTree.root;
+                root = tmp;
             }
         }
     }
-
+   
     // Read the last byte of the binary file
     fileIn.read(&buffer, 1);
     byte = (unsigned char)buffer;
@@ -88,10 +103,9 @@ void decompressToTextFile(void)  // decode data
         else root = root->r;
         if (root->l == nullptr && root->r == nullptr){
             fileOut << root->ch;
-            root = canonicalHuffmanTree.root;
+            root = tmp;
         }   
     }
-    canonicalHuffmanTree.deleteTree(canonicalHuffmanTree.root);
     cout << "Decompressing successfully" << endl;
     fileIn.close();
     fileOut.close();
@@ -105,81 +119,55 @@ void compressToBinaryFile(void)   // compress data
         cout << "Can't open file " << fileNameOut << endl;
         return;
     }
-    HuffmanCompressing huffmanCompressing;
-    huffmanCompressing.buildHuffmanTree();
-    huffmanCompressing.getMask();
-    huffmanCompressing.deleteTree(huffmanCompressing.root);
     // Write table for decoding data
     int table_size = 0;
     for (int i = 0; i < 256; i++){
-        if (charFreq[i] == 0) continue;
-        table_size++;
-        lstCanonical.push_back(make_pair(compressData[i], char(i)));
-        
-        // cerr << char(i) << " " << compressData[i].first << endl;
+        if (compressData[i].second != 0) table_size++;
     }
-
     fileOut.write((char *)&table_size, 1);
     for (int i = 0; i < 256; i++){
         if (charFreq[i] == 0) continue;
         char ch = i;
-        char bitLength = compressData[i];
+        uint32_t bit = compressData[i].first;
+        int bitSize = compressData[i].second;
         fileOut.write((char *)&ch, 1);
-        fileOut.write((char *)&bitLength, 1);
+        fileOut.write((char *)&bitSize, 1);
+        fileOut.write((char *)&bit, 4);
+        // cerr << ch << " " << bitSize << " " << bit << endl;
     }
-    
-    // Change to canonical form
-    sort(lstCanonical.begin(), lstCanonical.end());
-    CanonicalHuffmanTree canonicalHuffmanTree;
-    canonicalHuffmanTree.buildCode();
-    // canonicalHuffmanTree.printCodeBook();
+
     // Compress Data
-    bitset<8> byte, carryBit;
+    int byte = 0;
     int numBit = 0;
     int remainBit;
-    int maxLength = 0;
+    bool flag = true;
     for (int i = 0; line[i]; i++)
     {
         char ch = line[i];
-        bitset <256> convertBit = codeBook[ch];
-        // cout << ch << " " << codeBook[ch] << endl;
-        int bitLength = compressData[int(ch)];
-        maxLength = max(maxLength, bitLength);
-        while (bitLength > 0) {
+        int convertBit = compressData[int(ch)].first;
+        int bitSize = compressData[int(ch)].second;
+        while (bitSize > 0) {
             remainBit = 8 - numBit;
-            if (remainBit >= bitLength){
-                byte = (byte << bitLength);
-                ORBIT(byte, convertBit);
-                
-                numBit += bitLength;
-                bitLength = 0;
+            if (remainBit >= bitSize){
+                byte = (byte << bitSize) | convertBit;
+                numBit += bitSize;
+                bitSize = 0;
             }
             else{
-                bitLength -= remainBit;
-                byte <<= remainBit;
-                for (int i = 0; i < bitLength; i++){
-                    carryBit[i] = convertBit[i];
-                }
-                convertBit >>= bitLength;
-                ORBIT(byte, convertBit);
-                convertBit <<= bitLength;
-                for (int i = 0; i < bitLength; i++){
-                    convertBit[i] = carryBit[i];
-                }
+                bitSize -= remainBit;
+                byte = (byte << remainBit) | (convertBit >> bitSize);
                 fileOut.write((char *)&byte, 1);
-                numBit = 0;
-                byte = 0;
-                carryBit = 0;
+                numBit = byte = 0;
             }
         }
     }
-    
+   
     remainBit = 8 - numBit; 
     int padding = remainBit;
     byte = byte << padding;
     fileOut.write((char *)&byte, 1);
     fileOut.write((char *)&padding, 1);
-    cout << "Max length: " << maxLength << endl;
+
     cout << "Compressing successfully" << endl;
     fileOut.close();
 }
