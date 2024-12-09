@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
     string extFileIn = getExtension(fileNameIn);
     string extFileOut = getExtension(fileNameOut);
     
-    if (extFileIn == "txt" && extFileOut == "bin"){
+    if (extFileIn == "jpg" && extFileOut == "bin"){
         readTextFile(argv[1]);
         getFrequency();
         compressToBinaryFile();
