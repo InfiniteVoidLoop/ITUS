@@ -39,6 +39,14 @@ int balanceNumber(Node* root);
 int getHeight(Node* root);
 Node* findMin(Node* root);
 
+bool isFull(Node* root){
+    if (root == NULL) return true;
+    if (root->left == NULL && root->right == NULL)  return true;
+    if (root->left != NULL && root->right != NULL) return isFull(root->left) && isFull(root->right);
+    return false;
+}
+
+
 Node* findMin(Node* root){
     if (root == NULL) 
         return NULL;
