@@ -78,19 +78,20 @@ Node* deleted(Node* root, int data){
         root->left = deleted(root->left, data);
     else if (data > root->key)
         root->right = deleted(root->right, data);
-    
-    if (root->left != NULL && root->right != NULL){
-        Node* tmp = findMin(root->right);
-        root->key = tmp->key;
-        root->right = deleted(root->right, root->key);
-    }
     else{
-        Node* tmp = root;
-        if (root->left == NULL) 
-            root = root->right;
-        else if (root->right == NULL)
-            root = root->left;
-        delete tmp;
+        if (root->left != NULL && root->right != NULL){
+            Node* tmp = findMin(root->right);
+            root->key = tmp->key;
+            root->right = deleted(root->right, root->key);
+        }
+        else{
+            Node* tmp = root;
+            if (root->left == NULL) 
+                root = root->right;
+            else if (root->right == NULL)
+                root = root->left;
+            delete tmp;
+        }
     }
     return root;
 }
@@ -174,27 +175,32 @@ int countGreater(Node* root, int x){
 
 int main(){
     Node* root = NULL;
+   
     root = insert(root, 8);
     root = insert(root, 6);
     root = insert(root, 5);
     root = insert(root, 7);
     root = insert(root, 9);
     root = insert(root, 10);  
+    cout << "NLR: ";
     NLR(root);
     cout << '\n';
+    cout << "LNR: ";
     LNR(root);
     cout << '\n';
+    cout << "LRN: ";
     LRN(root);
     cout << '\n';
     deleted(root, 8);
+    cout << "LevelOrder: ";
     LevelOrder(root);
     cout << '\n';
     cout << "Height: " << height(root) << '\n';
     cout << "Count node: " << countNode(root) << '\n';
-    cout << "Count internal" << countInternal(root) << '\n';
+    cout << "Count internal: " << countInternal(root) << '\n';
     cout << "Sum node: " << sumNode(root) << '\n';
     cout << "Count leaf: " << countLeaf(root) << '\n';
-    cout << "Count less: " << countLess(root, 7) << '\n';
-    cout << "Count greater: " << countGreater(root, 7);
+    cout << "Count less than 7: " << countLess(root, 7) << '\n';
+    cout << "Count greater than 7: " << countGreater(root, 7);
     return 0;
 }

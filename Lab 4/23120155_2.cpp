@@ -46,6 +46,53 @@ bool isFull(Node* root){
     return false;
 }
 
+bool isComplete(Node* root){
+    if (root == NULL) return true;
+    queue <Node*>q;
+    q.push(root);
+    bool flag = false;
+    while(!q.empty()){
+        Node* u = q.front();
+        q.pop();
+        
+        if (u == NULL) flag = true;
+        else{
+            if (flag) return false;
+        }
+        if (u != NULL){
+            q.push(u->left);
+            q.push(u->right);
+        }
+    }
+}
+
+bool isPerfect(Node* root){
+    int h = getHeight(root);
+    return isComplete(root) && isFull(root);
+}
+
+int findCommonAncestor(Node* root, int x, int y){
+    if (root == NULL) return -1;
+    if (root->key == x || root->key == y) return root->key;
+    int leftLCA = findCommonAncestor(root->left, x, y);
+    int rightLCA = findCommonAncestor(root->right, x, y);
+    if (leftLCA != -1 && rightLCA != -1) return root->key;
+    if (leftLCA != -1) return leftLCA;
+    return rightLCA;
+}
+
+void printSpecialNode(Node* root){
+    if (root == NULL) return;
+    if (root->left != NULL && root->right != NULL && root->right->key % root->left->key == 0){
+        printSpecialNode(root->left);
+        cout << root->key << " ";
+        printSpecialNode(root->right);
+    }
+    else{
+        printSpecialNode(root->left);
+        printSpecialNode(root->right);
+    }
+}
 
 Node* findMin(Node* root){
     if (root == NULL) 
@@ -132,34 +179,33 @@ Node* searchNode(Node* root, int data){
 }
 
 Node* deleteNode(Node* root, int data){
-    if (root == NULL)   
+  if (root == NULL) 
         return NULL;
-
-    if (data < root->key)
+    else if (data < root->key)
         root->left = deleteNode(root->left, data);
-    
-    if (data > root->key)
+    else if (data > root->key)
         root->right = deleteNode(root->right, data);
-    
-    if (root->left != NULL || root->right != NULL){
-        Node* tmp = findMin(root->right);
-        root->key = tmp->key;
-        deleteNode(root->right, root->key);
-    }
     else{
-        Node* tmp = root;
-        if (root->left == NULL) 
-            root = root->right;
-        else if (root->right == NULL)
-            root = root->left;  
-        delete tmp;
+         if (root->left != NULL && root->right != NULL){
+            Node* tmp = findMin(root->right);
+            root->key = tmp->key;
+            root->right = deleteNode(root->right, root->key);
+        }
+        else{
+            Node* tmp = root;
+            if (root->left == NULL) 
+                root = root->right;
+            else if (root->right == NULL)
+                root = root->left;
+            delete tmp;
+        }
     }
     if (root == NULL)
-        return NULL;
+        return root;
+
     root->height = 1 + max(getHeight(root->left), getHeight(root->right));
-
     int balance = balanceNumber(root);
-
+    
     if (balance > 1 && data < root->left->key)      // Left Left Case
         return rightRotation(root);
     
@@ -203,8 +249,11 @@ void LRN(Node* root){
 }
 
 void LevelOrder(Node* root){
+    if (root == NULL)
+        return;
     queue <Node*> myQueue;
     myQueue.push(root);
+    
     while(!myQueue.empty()){
         Node* u = myQueue.front();
         myQueue.pop();
@@ -217,5 +266,40 @@ void LevelOrder(Node* root){
 }
 
 int main(){
-    
+    Node* root = NULL;
+    vector <int> lst = {1,2,3,4,5,6,7,8,9,10};
+    for (int i = 0; i < lst.size(); i++)
+        root = insertNode(root, lst[i]);
+
+    cout << "NLR: ";
+    NLR(root);
+    cout << '\n';
+    cout << "LNR: ";
+    LNR(root);
+    cout << '\n';
+    cout << "LRN: ";
+    LRN(root);
+    cout << '\n';
+    deleteNode(root, 8);
+    cout << "Level Order: ";
+    LevelOrder(root);
+    cout << '\n';
+    if (isFull(root))
+        cout << "The tree is full\n";
+    else
+        cout << "The tree is not full\n";
+
+    if (isComplete(root))
+        cout << "The tree is complete\n";
+    else
+        cout << "The tree is not complete\n";
+    if (isPerfect(root))
+        cout << "The tree is perfect\n";
+    else
+        cout << "The tree is not perfect\n";
+
+    cout << "Common ancestor of 5 and 9: " << findCommonAncestor(root, 5, 9) << '\n';
+    cout << "Special Nodes: ";
+    printSpecialNode(root);
+    return 0;
 }
