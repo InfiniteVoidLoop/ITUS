@@ -304,18 +304,19 @@ void NLR(Node* root) {
     if (!root) return;
 
     displayNode(root);
+
     for (int i = 0; i <= root->numKeys; ++i)
         NLR(root->children[i]);
 }
 
 void LNR(Node* root) {
-    if (!root) return;
-
-    for (int i = 0; i < root->numKeys; ++i) {
-        LNR(root->children[i]);
-        displayNode(root);
+    if (root != nullptr) {
+        for (int i = 0; i < root->numKeys; i++) {
+            LNR(root->children[i]);
+            cout << "[" << root->key[i] << "] ";
+        }
+        LNR(root->children[root->numKeys]);
     }
-    LNR(root->children[root->numKeys]);
 }
 
 void LRN(Node* root) {
