@@ -91,6 +91,7 @@ void readFile(void){
             if (cost) adj[i].push_back(make_pair(j, cost));
         }
     }
+    fileIn.close();
 }
 
 int main(){

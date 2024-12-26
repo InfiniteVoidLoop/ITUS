@@ -31,6 +31,7 @@ void readFile(void){
             if (cost) edge.push_back(Data(i, j, cost));
         }
     }
+    fileIn.close();
 }
 
 int dist[maxn], trace[maxn];

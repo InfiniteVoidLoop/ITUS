@@ -84,6 +84,7 @@ void readFile(void){
             if (cost) edge.push_back(Data(cost, i, j));
         }
     }
+    fileIn.close();
 }
 
 int main(){
