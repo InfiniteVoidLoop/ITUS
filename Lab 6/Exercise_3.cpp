@@ -1,73 +1,80 @@
-#include <iostream>
-#include <fstream>
+#include <iostream> 
+#include <fstream> 
 #include <vector>
+#define fi first
+#define se second
 #define maxn 100005
 using namespace std;
 
 struct Data{
-    int cost, u, v;
-    Data(int _cost, int _u, int _v){
-        cost = _cost;
+    int u, v, cost;
+    Data(int _u, int _v, int _cost){
         u = _u;
         v = _v;
+        cost = _cost;
     }
 };
 
-struct DSU{
-    int root[maxn];
-    
-    void build(int n){
-        for (int i = 0; i < n; i++) root[i] = -1;
-    }  
-
-    int find(int u){
-        if (root[u] < 0) return u;
-        return root[u] = find(root[u]);
+struct HEAP_SORT{
+    vector <Data> arr;
+    void heapify(int idx){
+        int n = arr.size();
+        int left = idx * 2 + 1;
+        int right = idx * 2 + 2;
+        int minID = idx;
+        if (left < n && arr[minID].cost > arr[left].cost){
+            minID = left;
+        }
+        if (right < n && arr[minID].cost > arr[right].cost){
+            minID = right;
+        }
+        if (minID != idx){
+            swap(arr[minID], arr[idx]);
+            heapify(minID);
+        }
     }
 
-    void join(int u, int v){
-        u = find(u);
-        v = find(v);
-        if (u == v) return;
-        if (root[u] > root[v]) swap(u, v);
-        root[u] += root[v];
-        root[v] = u;
+    void push(Data newNode){
+        arr.push_back(newNode);
+        int i = arr.size() - 1;
+        while (i > 0 && arr[i].cost < arr[(i - 1) / 2].cost){
+            swap(arr[(i - 1) / 2], arr[i]);
+            i = (i - 1) / 2;
+        }
+    }
+    
+    Data top(void){
+        Data res = arr[0];
+        arr[0] = arr.back();
+        arr.pop_back();
+        heapify(0);
+        return res;
     }
 };
 
 int n;
-vector <Data> edge;
+bool visited[maxn];
+vector <pair<int, int>> adj[maxn];
 
-void quickSort(int l, int r){
-    if (l >= r) return;
-    Data pivot = edge[(l + r) / 2];
-    int i = l, j = r;
-    while (i <= j){
-        while (edge[i].cost < pivot.cost) i++;
-        while (edge[j].cost > pivot.cost) j--;
-        if (i <= j){
-            swap(edge[i], edge[j]);
-            i++;
-            j--;
-        }
-    }
-    quickSort(l, j);
-    quickSort(i, r);
-}
-void kruskal(void){
-    DSU dsu;
-    dsu.build(n);
-    quickSort(0, edge.size() - 1);
+void prim(void){
     cout << "Edge" << "\t" << "Weight" << '\n';
-    for (int i = 0; i < edge.size(); i++){
-        int cost = edge[i].cost;
-        int u = edge[i].u;
-        int v = edge[i].v;
-        if (dsu.find(u) == dsu.find(v)) continue;
-        dsu.join(u, v);
-        cout << u << " - " << v << "\t" << cost << '\n';
+    HEAP_SORT heap;
+    for (int i = 0; i < n; i++) visited[i] = false;
+    heap.push(Data(0, 0, 0));
+
+    while (heap.arr.size() != 0){
+        Data tmp = heap.top();
+        if (visited[tmp.v]) continue;
+        visited[tmp.v] = true;
         
-    }
+        if (tmp.u != tmp.v)
+            cout << tmp.u << " - " << tmp.v << '\t' << tmp.cost << '\n';
+
+        for (pair <int, int> v: adj[tmp.v]){
+            if (!visited[v.fi])
+                heap.push(Data(tmp.v, v.fi, v.se));
+        }  
+    }    
 }
 
 void readFile(void){
@@ -81,7 +88,7 @@ void readFile(void){
         for (int j = 0; j < n; j++){
             int cost;
             fileIn >> cost;
-            if (cost) edge.push_back(Data(cost, i, j));
+            if (cost) adj[i].push_back(make_pair(j, cost));
         }
     }
     fileIn.close();
@@ -89,6 +96,6 @@ void readFile(void){
 
 int main(){
     readFile();
-    kruskal();
+    prim();
     return 0;
 }
