@@ -7,23 +7,22 @@
 #define pii pair<int, int>
 #define fo(i, a, b) for (int i = a; i <= b; i++)
 using namespace std;
-vector<pii>lst;
 vector <int> a;
 int n;
 
 struct Data{
     int max, min, gcd;    
 };
+vector<vector<Data>> st;
+vector <Data> tmp;
 
 int GCD(int a, int b){
     if (b == 0) return a;
     return GCD(b, a % b);
 }
 
-void process(void){
+void preCal(void){
     int log = log2(n) + 1;
-    vector<vector<Data>> st;
-    vector <Data> tmp;
     fo(i, 0, log - 1) tmp.pb({-1000000000, 1000000000, 0});
     fo(i, 0, n - 1){
         st.pb(tmp);
@@ -39,18 +38,15 @@ void process(void){
             st[j][i].gcd = GCD(st[j][i - 1].gcd, st[j + (1<<(i - 1))][i - 1].gcd);            
         }
     }
+}
 
-    fo(i, 0, lst.size() - 1){
-        int l = lst[i].fi;
-        int r = lst[i].se;
-        
-        int len = r - l + 1;
-        int k = log2(len);
-        int maxVal = max(st[l][k].max, st[r - (1<<k) + 1][k].max);
-        int minVal = min(st[l][k].min, st[r - (1<<k) + 1][k].min);
-        int gcdVal = GCD(st[l][k].gcd, st[r - (1<<k) + 1][k].gcd);
-        cout << maxVal << " " <<  minVal << " " << gcdVal << '\n'; 
-    }
+void cal(int l, int r){
+    int len = r - l + 1;
+    int k = log2(len);
+    int maxVal = max(st[l][k].max, st[r - (1<<k) + 1][k].max);
+    int minVal = min(st[l][k].min, st[r - (1<<k) + 1][k].min);
+    int gcdVal = GCD(st[l][k].gcd, st[r - (1<<k) + 1][k].gcd);
+    cout << maxVal << " " <<  minVal << " " << gcdVal << '\n'; 
 }
 
 int main(){
@@ -60,13 +56,13 @@ int main(){
         cin >> x;
         a.push_back(x);
     }
+    preCal();
     int l, r;
     while(cin >> l >> r){
         if (l == -1 && r == -1) break;  // END OF INPUT
         else{
-            lst.push_back({l, r});
+            cal(l, r);
         }
     }
-    process();
     return 0;
 }
